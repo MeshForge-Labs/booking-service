@@ -1,0 +1,24 @@
+{
+  "name": "booking-service",
+  "version": "1.0.0",
+  "description": "Booking orchestration microservice for AKS",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "pg": "^8.11.3",
+    "swagger-ui-express": "^5.0.0",
+    "winston": "^3.11.0"
+  }
+}
