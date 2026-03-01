@@ -7,7 +7,7 @@ const router = express.Router();
 
 const createBookingValidation = [
   body('eventId').notEmpty().withMessage('eventId is required').isInt({ min: 1 }).withMessage('eventId must be a positive integer').toInt(),
-  body('quantity').notEmpty().withMessage('quantity is required').isInt({ min: 1 }).withMessage('quantity must be at least 1').toInt(),
+  body('seats').notEmpty().withMessage('seats is required').isInt({ min: 1 }).withMessage('seats must be at least 1').toInt(),
 ];
 
 const getBookingValidation = [

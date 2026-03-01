@@ -33,10 +33,10 @@ module.exports = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['eventId', 'quantity'],
+                required: ['eventId', 'seats'],
                 properties: {
                   eventId: { type: 'integer', minimum: 1 },
-                  quantity: { type: 'integer', minimum: 1 },
+                  seats: { type: 'integer', minimum: 1 },
                 },
               },
             },

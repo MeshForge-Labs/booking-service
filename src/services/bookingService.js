@@ -5,7 +5,7 @@ const notificationService = require('./notificationService');
 const Booking = require('../models/Booking');
 const logger = require('../utils/logger');
 
-async function createBooking(eventId, quantity, authorizationHeader) {
+async function createBooking(eventId, seats, authorizationHeader) {
   const auth = await authService.validateToken(authorizationHeader);
   if (!auth) {
     const err = new Error('Invalid or missing token');
@@ -21,7 +21,7 @@ async function createBooking(eventId, quantity, authorizationHeader) {
     throw err;
   }
 
-  const reserveResult = await eventService.reserveSeats(eventId, quantity, authorizationHeader);
+  const reserveResult = await eventService.reserveSeats(eventId, seats, authorizationHeader);
   if (!reserveResult.success) {
     if (reserveResult.conflict) {
       const err = new Error(reserveResult.message || 'Not enough seats');
@@ -46,10 +46,10 @@ async function createBooking(eventId, quantity, authorizationHeader) {
       id,
       userId,
       eventId: String(eventId),
-      quantity,
+      quantity: seats,
       status: 'CONFIRMED',
     });
-    logger.info('Booking created', { bookingId: id, userId, eventId, quantity });
+    logger.info('Booking created', { bookingId: id, userId, eventId, seats });
 
     setImmediate(() => {
       notificationService.notifyBooking(booking, authorizationHeader).catch(() => {});

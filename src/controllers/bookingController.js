@@ -3,9 +3,9 @@ const logger = require('../utils/logger');
 
 async function createBooking(req, res, next) {
   try {
-    const { eventId, quantity } = req.body;
+    const { eventId, seats } = req.body;
     const authHeader = req.headers.authorization;
-    const booking = await bookingService.createBooking(eventId, quantity, authHeader);
+    const booking = await bookingService.createBooking(eventId, seats, authHeader);
     res.status(201).json(booking);
   } catch (err) {
     if (err.statusCode) {

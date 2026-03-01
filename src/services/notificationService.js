@@ -9,9 +9,9 @@ async function notifyBooking(booking, authorizationHeader) {
     const res = await client.post(
       '/api/notifications',
       {
-        userId: booking.userId,
-        eventId: booking.eventId,
         bookingId: booking.id,
+        email: booking.userId,
+        eventId: booking.eventId,
         quantity: booking.quantity,
       },
       { headers: { Authorization: authorizationHeader } }
