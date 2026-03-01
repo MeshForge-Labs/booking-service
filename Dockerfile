@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 FROM node:20-alpine
-RUN addgroup -g 1000 appgroup && adduser -u 1000 -G appgroup -s /bin/sh -D appuser
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
