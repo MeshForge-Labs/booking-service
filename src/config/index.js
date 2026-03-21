@@ -11,6 +11,14 @@ const defaultDbUrl =
   `postgresql://${encodeURIComponent(defaultDbUser)}:${encodeURIComponent(defaultDbPassword)}` +
   `@${defaultDbHost}:${defaultDbPort}/${defaultDbName}`;
 
+function parseBoolean(value, fallback) {
+  if (value === undefined || value === null || String(value).trim() === '') return fallback;
+  const normalized = String(value).trim().toLowerCase();
+  if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) return true;
+  if (['false', '0', 'no', 'n', 'off'].includes(normalized)) return false;
+  return fallback;
+}
+
 function normalizeDatabaseUrl(rawValue) {
   if (!rawValue) return defaultDbUrl;
 
@@ -60,6 +68,8 @@ module.exports = {
     max: parseInt(process.env.DB_POOL_SIZE || '10', 10),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
+    ssl: parseBoolean(process.env.DB_SSL, isProduction),
+    sslRejectUnauthorized: parseBoolean(process.env.DB_SSL_REJECT_UNAUTHORIZED, false),
   },
 
   services: {

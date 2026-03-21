@@ -7,6 +7,9 @@ const pool = new Pool({
   max: config.database.max,
   idleTimeoutMillis: config.database.idleTimeoutMillis,
   connectionTimeoutMillis: config.database.connectionTimeoutMillis,
+  ssl: config.database.ssl
+    ? { rejectUnauthorized: config.database.sslRejectUnauthorized }
+    : false,
 });
 
 pool.on('error', (err) => logger.error('Pool error', { error: err.message }));
