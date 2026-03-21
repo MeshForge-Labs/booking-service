@@ -151,6 +151,11 @@ async function cancelBooking(id, authorizationHeader) {
 
     const updated = await Booking.updateStatus(client, id, 'CANCELLED');
     logger.info('Booking cancelled', { bookingId: id, userId: auth.subject });
+
+    setImmediate(() => {
+      notificationService.notifyCancellation(updated, authorizationHeader).catch(() => {});
+    });
+
     return updated;
   } finally {
     client.release();

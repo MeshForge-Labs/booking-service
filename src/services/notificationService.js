@@ -9,6 +9,7 @@ async function notifyBooking(booking, authorizationHeader) {
     const res = await client.post(
       '/api/notifications',
       {
+        type: 'BOOKING_CONFIRMED',
         bookingId: booking.id,
         email: booking.userId,
         eventId: booking.eventId,
@@ -28,4 +29,29 @@ async function notifyBooking(booking, authorizationHeader) {
   }
 }
 
-module.exports = { notifyBooking };
+async function notifyCancellation(booking, authorizationHeader) {
+  try {
+    const res = await client.post(
+      '/api/notifications',
+      {
+        type: 'BOOKING_CANCELLED',
+        bookingId: booking.id,
+        email: booking.userId,
+        eventId: booking.eventId,
+        quantity: booking.quantity,
+      },
+      { headers: { Authorization: authorizationHeader } }
+    );
+    if (res.status >= 200 && res.status < 300) {
+      logger.info('Cancellation notification sent', { bookingId: booking.id });
+      return true;
+    }
+    logger.warn('Notification service returned non-success', { status: res.status, bookingId: booking.id });
+    return false;
+  } catch (err) {
+    logger.warn('Notification service call failed', { bookingId: booking.id, error: err.message });
+    return false;
+  }
+}
+
+module.exports = { notifyBooking, notifyCancellation };
