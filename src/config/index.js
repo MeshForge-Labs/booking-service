@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const apiGatewayUrl = process.env.API_GATEWAY_URL;
+
 module.exports = {
   port: parseInt(process.env.PORT || '8082', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -12,9 +14,9 @@ module.exports = {
   },
 
   services: {
-    authServiceUrl: process.env.AUTH_SERVICE_URL || 'http://localhost:8080',
-    eventServiceUrl: process.env.EVENT_SERVICE_URL || 'http://localhost:8081',
-    notificationServiceUrl: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:8083',
+    authServiceUrl: process.env.AUTH_SERVICE_URL || apiGatewayUrl || 'http://localhost:8080',
+    eventServiceUrl: process.env.EVENT_SERVICE_URL || apiGatewayUrl || 'http://localhost:8081',
+    notificationServiceUrl: process.env.NOTIFICATION_SERVICE_URL || apiGatewayUrl || 'http://localhost:8083',
   },
 
   http: {

@@ -23,6 +23,28 @@ async function findById(client, id) {
   return result.rows[0] || null;
 }
 
+async function findByUserId(client, userId) {
+  const query = `
+    SELECT id, user_id AS "userId", event_id AS "eventId", quantity, status, created_at AS "createdAt", updated_at AS "updatedAt"
+    FROM ${TABLE}
+    WHERE user_id = $1
+    ORDER BY created_at DESC
+  `;
+  const result = await client.query(query, [userId]);
+  return result.rows;
+}
+
+async function updateStatus(client, id, status) {
+  const query = `
+    UPDATE ${TABLE}
+    SET status = $2, updated_at = NOW()
+    WHERE id = $1
+    RETURNING id, user_id AS "userId", event_id AS "eventId", quantity, status, created_at AS "createdAt", updated_at AS "updatedAt"
+  `;
+  const result = await client.query(query, [id, status]);
+  return result.rows[0] || null;
+}
+
 async function getPool() {
   return pool;
 }
@@ -30,5 +52,7 @@ async function getPool() {
 module.exports = {
   create,
   findById,
+  findByUserId,
+  updateStatus,
   getPool,
 };

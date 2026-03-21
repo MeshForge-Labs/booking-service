@@ -40,4 +40,25 @@ async function reserveSeats(eventId, quantity, authorizationHeader) {
   }
 }
 
-module.exports = { getEvent, reserveSeats };
+async function releaseSeats(eventId, quantity, authorizationHeader) {
+  try {
+    const res = await client.put(`/api/events/${eventId}/release`, { quantity }, {
+      headers: { Authorization: authorizationHeader },
+    });
+    if (res.status === 200) {
+      return { success: true, data: res.data };
+    }
+    if (res.status === 404) {
+      return { success: false, notFound: true };
+    }
+    if (res.status === 409) {
+      return { success: false, conflict: true, message: res.data?.message || 'Release conflict' };
+    }
+    return { success: false, message: res.data?.message || 'Release failed' };
+  } catch (err) {
+    logger.warn('Event service release failed', { eventId, quantity, error: err.message });
+    return { success: false, message: err.message };
+  }
+}
+
+module.exports = { getEvent, reserveSeats, releaseSeats };

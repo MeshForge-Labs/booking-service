@@ -15,6 +15,8 @@ const getBookingValidation = [
 ];
 
 router.post('/', createBookingValidation, validate, bookingController.createBooking);
+router.get('/', bookingController.listMyBookings);
 router.get('/:id', getBookingValidation, validate, bookingController.getBookingById);
+router.put('/:id/cancel', getBookingValidation, validate, bookingController.cancelBooking);
 
 module.exports = router;

@@ -89,4 +89,72 @@ async function getBookingById(id, authorizationHeader) {
   }
 }
 
-module.exports = { createBooking, getBookingById };
+async function listMyBookings(authorizationHeader) {
+  const auth = await authService.validateToken(authorizationHeader);
+  if (!auth) {
+    const err = new Error('Invalid or missing token');
+    err.statusCode = 401;
+    throw err;
+  }
+
+  const pool = Booking.getPool();
+  const client = await pool.connect();
+  try {
+    return await Booking.findByUserId(client, auth.subject);
+  } finally {
+    client.release();
+  }
+}
+
+async function cancelBooking(id, authorizationHeader) {
+  const auth = await authService.validateToken(authorizationHeader);
+  if (!auth) {
+    const err = new Error('Invalid or missing token');
+    err.statusCode = 401;
+    throw err;
+  }
+
+  const pool = Booking.getPool();
+  const client = await pool.connect();
+  try {
+    const booking = await Booking.findById(client, id);
+    if (!booking) {
+      const err = new Error('Booking not found');
+      err.statusCode = 404;
+      throw err;
+    }
+    if (booking.userId !== auth.subject && !auth.roles.includes('ROLE_ADMIN')) {
+      const err = new Error('Forbidden');
+      err.statusCode = 403;
+      throw err;
+    }
+    if (booking.status === 'CANCELLED') {
+      return booking;
+    }
+
+    const releaseResult = await eventService.releaseSeats(booking.eventId, booking.quantity, authorizationHeader);
+    if (!releaseResult.success) {
+      if (releaseResult.notFound) {
+        const err = new Error('Event not found');
+        err.statusCode = 404;
+        throw err;
+      }
+      if (releaseResult.conflict) {
+        const err = new Error(releaseResult.message || 'Failed to release seats');
+        err.statusCode = 409;
+        throw err;
+      }
+      const err = new Error(releaseResult.message || 'Failed to release seats');
+      err.statusCode = 502;
+      throw err;
+    }
+
+    const updated = await Booking.updateStatus(client, id, 'CANCELLED');
+    logger.info('Booking cancelled', { bookingId: id, userId: auth.subject });
+    return updated;
+  } finally {
+    client.release();
+  }
+}
+
+module.exports = { createBooking, getBookingById, listMyBookings, cancelBooking };
