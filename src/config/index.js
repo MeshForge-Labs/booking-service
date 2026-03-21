@@ -1,7 +1,15 @@
 require('dotenv').config();
 
 const apiGatewayUrl = process.env.API_GATEWAY_URL;
-const defaultDbUrl = 'postgresql://postgres:postgres@localhost:5432/booking_db';
+const isProduction = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+const defaultDbHost = process.env.DB_HOST || (isProduction ? 'postgres' : 'localhost');
+const defaultDbPort = parseInt(process.env.DB_PORT || '5432', 10);
+const defaultDbName = process.env.DB_NAME || 'booking_db';
+const defaultDbUser = process.env.DB_USER || 'postgres';
+const defaultDbPassword = process.env.DB_PASSWORD || 'postgres';
+const defaultDbUrl =
+  `postgresql://${encodeURIComponent(defaultDbUser)}:${encodeURIComponent(defaultDbPassword)}` +
+  `@${defaultDbHost}:${defaultDbPort}/${defaultDbName}`;
 
 function normalizeDatabaseUrl(rawValue) {
   if (!rawValue) return defaultDbUrl;
