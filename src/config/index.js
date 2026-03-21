@@ -1,13 +1,35 @@
 require('dotenv').config();
 
 const apiGatewayUrl = process.env.API_GATEWAY_URL;
+const defaultDbUrl = 'postgresql://postgres:postgres@localhost:5432/booking_db';
+
+function normalizeDatabaseUrl(rawValue) {
+  if (!rawValue) return defaultDbUrl;
+
+  let value = String(rawValue).trim();
+
+  // Some secret providers/template pipelines can inject wrapping quotes.
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+
+  // Accept JDBC-style Postgres URLs used by Java services.
+  if (value.startsWith('jdbc:postgresql://')) {
+    value = value.replace(/^jdbc:/, '');
+  }
+
+  return value || defaultDbUrl;
+}
 
 module.exports = {
   port: parseInt(process.env.PORT || '8082', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
 
   database: {
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/booking_db',
+    connectionString: normalizeDatabaseUrl(process.env.DATABASE_URL),
     max: parseInt(process.env.DB_POOL_SIZE || '10', 10),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
