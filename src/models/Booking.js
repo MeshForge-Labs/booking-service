@@ -1,7 +1,6 @@
-const { pool } = require('./db');
-const logger = require('../utils/logger');
+const { pool } = require("./db");
 
-const TABLE = 'bookings';
+const TABLE = "bookings";
 
 async function create(client, { id, userId, eventId, quantity, status }) {
   const query = `
@@ -9,7 +8,13 @@ async function create(client, { id, userId, eventId, quantity, status }) {
     VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
     RETURNING id, user_id AS "userId", event_id AS "eventId", quantity, status, created_at AS "createdAt", updated_at AS "updatedAt"
   `;
-  const result = await client.query(query, [id, userId, eventId, quantity, status || 'CONFIRMED']);
+  const result = await client.query(query, [
+    id,
+    userId,
+    eventId,
+    quantity,
+    status || "CONFIRMED",
+  ]);
   return result.rows[0];
 }
 
@@ -45,7 +50,7 @@ async function updateStatus(client, id, status) {
   return result.rows[0] || null;
 }
 
-async function getPool() {
+function getPool() {
   return pool;
 }
 
