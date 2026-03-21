@@ -21,6 +21,25 @@ function normalizeDatabaseUrl(rawValue) {
     value = value.replace(/^jdbc:/, '');
   }
 
+  // Accept host:port/db and localhost:5432/db shapes by adding protocol.
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(value) && /^[^/\s]+(:\d+)?\/[^\s]+$/.test(value)) {
+    value = `postgresql://${value}`;
+  }
+
+  // Template placeholders should never reach runtime connection parsing.
+  if (/\$\{[^}]+\}|<[^>]+>/.test(value)) {
+    return defaultDbUrl;
+  }
+
+  try {
+    const parsed = new URL(value);
+    if (!['postgres:', 'postgresql:'].includes(parsed.protocol)) {
+      return defaultDbUrl;
+    }
+  } catch {
+    return defaultDbUrl;
+  }
+
   return value || defaultDbUrl;
 }
 
