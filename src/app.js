@@ -33,6 +33,9 @@ app.use(
 app.use(express.json());
  
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api-docs.json', (req, res) => {
+  res.json(swaggerSpec);
+});
 app.get('/health', healthHandler);
 app.get('/health/ready', readinessHandler);
 app.use('/api', routes);

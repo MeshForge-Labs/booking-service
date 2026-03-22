@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: Booking Service API
+  version: 1.0.0
+  description: |
+    Booking orchestration for AKS.
+    **Live docs:** Swagger UI at `/api-docs` (same spec as `src/config/swagger.js`).
+servers:
+  - url: /
+    description: Service root
+tags:
+  - name: Health
+    description: Health checks
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+        eventId:
+          type: string
+        quantity:
+          type: integer
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+paths:
+  /health:
+    get:
+      summary: Liveness probe
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+                  service:
+                    type: string
+                    example: booking-service
+                  timestamp:
+                    type: string
+                    format: date-time
+  /health/ready:
+    get:
+      summary: Readiness (database)
+      tags: [Health]
+      responses:
+        '200':
+          description: Database connected
+        '503':
+          description: Database unavailable
+  /api/bookings:
+    post:
+      summary: Create a booking
+      description: Validates JWT, verifies event, reserves seats, creates booking, notifies.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventId, seats]
+              properties:
+                eventId:
+                  type: integer
+                  minimum: 1
+                seats:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: Booking created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid or missing token
+        '404':
+          description: Event not found
+        '409':
+          description: Not enough seats
+  /api/bookings/{id}:
+    get:
+      summary: Get booking by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '401':
+          description: Invalid or missing token
+        '403':
+          description: Forbidden
+        '404':
+          description: Booking not found
